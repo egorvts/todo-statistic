@@ -27,7 +27,10 @@ function processCommand(command) {
       break;
     case "sort":
       console.log(sortComments(getAllOneLineComments(files), command.slice(5)));
-      break;
+        break;
+      case "date":
+        console.log(getAllOneLineCommentsAfterDate(files, command.slice(5)));
+        break;
     default:
       console.log("wrong command");
       break;
@@ -37,7 +40,19 @@ function processCommand(command) {
 // TODO you can do it!
 function getAllOneLineComments(files) {
   return files.flatMap((file) =>
-    file.split("\n").filter((line) => line.startsWith("// TODO ")),
+    file.split("\n").filter((line) => /^\/\/\s*todo\s*:?\s/i.test(line)),
+  );
+}
+
+function getAllOneLineCommentsAfterDate(files, date) {
+  return files.flatMap((file) =>
+    file.split("\n").filter((line) => {
+      if (!/^\/\/\s*todo\s*:?\s/i.test(line)) {
+        return false;
+      }
+      const lineDate = tryGetDate(line);
+      return lineDate && lineDate >= date;
+    }),
   );
 }
 
@@ -45,7 +60,7 @@ function getAllOneLineImportantComments(files) {
   return files.flatMap((file) =>
     file
       .split("\n")
-      .filter((line) => line.startsWith("// TODO ") && line.includes("!")),
+      .filter((line) => /^\/\/\s*todo\s*:?\s/i.test(line) && line.includes("!")),
   );
 }
 
@@ -65,7 +80,11 @@ function tryGetUser(comment) {
 
 function tryGetDate(comment) {
   try {
-    return comment.split(/[\s;]+/)[3].toLowerCase();
+    const date = comment.split(/[\s;]+/)[3];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
+    }
+    return null;
   } catch (error) {
     return null;
   }
@@ -73,21 +92,28 @@ function tryGetDate(comment) {
 
 function sortComments(comments, sortBy) {
   switch (sortBy) {
-    case 'importance':
+    case "importance":
       return comments.sort((a, b) => b.split("!").length - a.split("!").length);
-    case 'user':
+    case "user":
       return comments.sort((a, b) => {
         const userA = tryGetUser(a);
         const userB = tryGetUser(b);
 
         return userA?.localeCompare(userB) ?? 0;
       });
-      case 'date':
-            return comments.sort((a, b) => {
-            const dateA = tryGetDate(a);
-            const dateB = tryGetDate(b);
+    case "date":
+      return comments.sort((a, b) => {
+        const dateA = tryGetDate(a);
+        const dateB = tryGetDate(b);
 
-            return -(dateA?.localeCompare(dateB) ?? 0);
-        });             
+        if (dateA === null) {
+          return dateB === null ? 0 : 1;
+        }
+        if (dateB === null) {
+          return -1;
+        }
+
+        return -dateA.localeCompare(dateB);
+      });
   }
 }
