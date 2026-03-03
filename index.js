@@ -15,7 +15,7 @@ function processCommand(command) {
     switch (command) {
         case 'exit':
             process.exit(0);
-        case 'test':
+        case 'show':
             console.log(getAllOneLineComments(files));
             break;
         default:
