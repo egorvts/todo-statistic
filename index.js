@@ -18,6 +18,8 @@ function processCommand(command) {
         case 'show':
             console.log(getAllOneLineComments(files));
             break;
+        case 'important':
+            console.log(getAllOneLineImportantComments(files))
         default:
             console.log('wrong command');
             break;
@@ -26,7 +28,13 @@ function processCommand(command) {
 
 // TODO you can do it!
 function getAllOneLineComments(files) {
-    return files.flatMap(file => 
+    return files.flatMap(file =>
         file.split('\n').filter(line => line.startsWith('// TODO '))
+    );
+}
+
+function getAllOneLineImportantComments(files) {
+    return files.flatMap(file =>
+        file.split('\n').filter(line => line.startsWith('// TODO ') && line.includes('!'))
     );
 }
