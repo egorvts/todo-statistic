@@ -12,7 +12,8 @@ function getFiles() {
 }
 
 function processCommand(command) {
-    switch (command) {
+    const [cmd] = command.split(' ');
+    switch (cmd) {
         case 'exit':
             process.exit(0);
         case 'show':
@@ -20,6 +21,10 @@ function processCommand(command) {
             break;
         case 'important':
             console.log(getAllOneLineImportantComments(files))
+            break;
+        case 'user':
+            console.log(getAllOneLineCommentsByUser(files, command.slice(5)))
+            break;
         default:
             console.log('wrong command');
             break;
@@ -37,4 +42,16 @@ function getAllOneLineImportantComments(files) {
     return files.flatMap(file =>
         file.split('\n').filter(line => line.startsWith('// TODO ') && line.includes('!'))
     );
+}
+
+function getAllOneLineCommentsByUser(files, user) {
+    return getAllOneLineComments(files).filter(c => tryGetUser(c) === user.toLowerCase());
+}
+
+function tryGetUser(comment) {
+    try {
+        return comment.split(/[\s;]+/)[2].toLowerCase();
+    } catch (error) {
+        return null;
+    }
 }
