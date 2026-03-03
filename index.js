@@ -15,6 +15,8 @@ function processCommand(command) {
     switch (command) {
         case 'exit':
             process.exit(0);
+        case 'test':
+            console.log(getAllOneLineComments(files));
             break;
         default:
             console.log('wrong command');
@@ -23,3 +25,8 @@ function processCommand(command) {
 }
 
 // TODO you can do it!
+function getAllOneLineComments(files) {
+    return files.flatMap(file => 
+        file.split('\n').filter(line => line.startsWith('// TODO '))
+    );
+}
